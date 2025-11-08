@@ -1,0 +1,40 @@
+import gleam/set.{type Set}
+import gleam/list
+import gleam/result
+import gleam/string
+
+pub fn new_collection(card: String) -> Set(String) {
+  set.new() |> set.insert(card)
+}
+
+pub fn add_card(collection: Set(String), card: String) -> #(Bool, Set(String)) {
+  let already_in_collection = set.contains(collection, card)
+  #(already_in_collection, set.insert(collection, card))
+}
+
+pub fn trade_card(
+  my_card: String,
+  their_card: String,
+  collection: Set(String),
+) -> #(Bool, Set(String)) {
+  let want_card = !set.contains(collection, their_card)
+  let have_card_to_trade = set.contains(collection, my_card)
+  #(want_card && have_card_to_trade, 
+    collection |> set.insert(their_card) |> set.delete(my_card))
+}
+
+pub fn boring_cards(collections: List(Set(String))) -> List(String) {
+  list.reduce(collections, with: fn(acc, collection) { set.intersection(acc, collection)})
+  |> result.unwrap(set.new())
+  |> set.to_list()
+}
+
+pub fn total_cards(collections: List(Set(String))) -> Int {
+  list.reduce(collections, with: fn(acc, collection) { set.union(acc, collection)})
+  |> result.unwrap(set.new())
+  |> set.size()
+}
+
+pub fn shiny_cards(collection: Set(String)) -> Set(String) {
+  set.filter(collection, fn(card) { string.starts_with(card, "Shiny ")})
+}
