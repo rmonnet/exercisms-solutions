@@ -1,0 +1,54 @@
+package robotname
+
+import (
+    "math/rand"
+    "fmt"
+    "errors"
+)
+
+const numPossibleNames = 26 * 26 * 1000
+
+// Define the Robot type here.
+type Robot struct {
+    name string
+}
+
+var usedNames = make(map[string]struct{})
+
+func newName() (string, error) {
+    if len(usedNames) >= numPossibleNames {
+        return "", errors.New("List of possible names exhausted")
+    }
+    // If there is at least one name available, we should be
+    // able to find it, even if we have to loop for a very long time, so
+    // this is guaranted not to be an infinite loop.
+    for {
+     	r1 := 'A' + int32(rand.Intn(26))
+        r2 := 'A' + int32(rand.Intn(26))
+        r345 := rand.Intn(1000)
+        name := fmt.Sprintf("%c%c%03d", r1, r2, r345)
+        if _, ok := usedNames[name]; !ok {
+            usedNames[name] = struct{}{}
+            return name, nil
+        }
+    }
+}
+
+func (r *Robot) Name() (string, error) {
+	if r.name == "" {
+        name, err := newName()
+        if err != nil {
+            return "", err
+        }
+        r.name = name
+    }
+    return r.name, nil
+}
+
+func (r *Robot) Reset() {
+    name, err := newName()
+    // If no new name is available, we may as well keep out current one.
+    if err == nil {
+        r.name = name
+    }
+}
